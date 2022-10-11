@@ -1,5 +1,6 @@
 package kr.co.fastcampus.eatgo.interfaces;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.co.fastcampus.eatgo.application.RestaurantService;
 import kr.co.fastcampus.eatgo.domain.MenuItem;
 import kr.co.fastcampus.eatgo.domain.Restaurant;
@@ -31,6 +32,9 @@ public class RestaurantControllerTest {
 
     @MockBean
     private RestaurantService restaurantService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     public void list() throws Exception {
@@ -103,6 +107,10 @@ public class RestaurantControllerTest {
     @Test
     public void create() throws Exception {
 
+        Map<String, String> input = new HashMap<>();
+        input.put("name", "BeRyong");
+        input.put("address", "Busan");
+
         given(restaurantService.addRestaurant(any())).will(invocation -> {
             Restaurant restaurant = invocation.getArgument(0);
             return Restaurant.builder()
@@ -114,7 +122,8 @@ public class RestaurantControllerTest {
 
         mvc.perform(post("/restaurants")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name:\":\"BeRyong\",\"address\":\"Busan\"}"))
+                .content(objectMapper.writeValueAsString(input)))
+                //.content("{\"name:\":\"BeRyong\",\"address\":\"Busan\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("location", "/restaurants/1234"))
                 .andExpect(content().string("{}"));
@@ -124,9 +133,14 @@ public class RestaurantControllerTest {
 
     @Test
     public void update() throws Exception {
+        Map<String, String> input = new HashMap<>();
+        input.put("name", "JOKER Bar");
+        input.put("address", "Busan");
+
         mvc.perform(patch("/restaurants/1004")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name:\":\"JOKER Bar\",\"address\":\"Busan\"}"))
+                .content(objectMapper.writeValueAsString(input)))
+                //.content("{\"name:\":\"JOKER Bar\",\"address\":\"Busan\"}"))
                 .andExpect(status().isOk());
 
         verify(restaurantService).updateRestaurant(1004L, "JOKER Bar", "Busan");
