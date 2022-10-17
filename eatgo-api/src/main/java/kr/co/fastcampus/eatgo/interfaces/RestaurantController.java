@@ -1,14 +1,14 @@
 package kr.co.fastcampus.eatgo.interfaces;
 
 import kr.co.fastcampus.eatgo.application.RestaurantService;
-import kr.co.fastcampus.eatgo.domain.MenuItem;
-import kr.co.fastcampus.eatgo.domain.MenuItemRepository;
 import kr.co.fastcampus.eatgo.domain.Restaurant;
-import kr.co.fastcampus.eatgo.domain.RestaurantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -38,7 +38,7 @@ public class RestaurantController {
     }
 
     @PostMapping(value = "/restaurants", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> create(@RequestBody Restaurant resource) throws URISyntaxException {
+    public ResponseEntity<?> create(@Valid @RequestBody Restaurant resource) throws URISyntaxException {
 
         Restaurant restaurant = restaurantService.addRestaurant(
                 Restaurant.builder()
@@ -51,15 +51,16 @@ public class RestaurantController {
         return ResponseEntity.created(location).body("{}");
     }
 
-    @PatchMapping("/restaurants/{id}")
+    @PatchMapping(value = "/restaurants/{id}", produces = "application/json; charset=UTF-8")
     public String update(@PathVariable("id") Long id,
-                         @RequestBody Restaurant resource){
+                         @Valid @RequestBody Restaurant resource){
 
         String name = resource.getName();
         String address = resource.getAddress();
 
         restaurantService.updateRestaurant(id, name, address);
 
+        //URI location = new URI("/restaurants/" + restaurant.getId());
         return "{}";
     }
 }

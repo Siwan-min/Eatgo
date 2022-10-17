@@ -105,7 +105,7 @@ public class RestaurantControllerTest {
 
 
     @Test
-    public void create() throws Exception {
+    public void createWithValidData() throws Exception {
 
         Map<String, String> input = new HashMap<>();
         input.put("name", "BeRyong");
@@ -132,7 +132,20 @@ public class RestaurantControllerTest {
     }
 
     @Test
-    public void update() throws Exception {
+    public void createWithInvalidData() throws Exception {
+
+        Map<String, String> input = new HashMap<>();
+        input.put("name", "");
+        input.put("address", "");
+
+        mvc.perform(post("/restaurants")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(input)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void updateWithValidData() throws Exception {
         Map<String, String> input = new HashMap<>();
         input.put("name", "JOKER Bar");
         input.put("address", "Busan");
@@ -144,5 +157,29 @@ public class RestaurantControllerTest {
                 .andExpect(status().isOk());
 
         verify(restaurantService).updateRestaurant(1004L, "JOKER Bar", "Busan");
+    }
+
+    @Test
+    public void updateWithInvalidData() throws Exception {
+        Map<String, String> input = new HashMap<>();
+        input.put("name", "");
+        input.put("address", "");
+
+        mvc.perform(patch("/restaurants/1004")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(input)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void updateWithoutName() throws Exception {
+        Map<String, String> input = new HashMap<>();
+        input.put("name", "");
+        input.put("address", "Busan");
+
+        mvc.perform(patch("/restaurants/1004")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(input)))
+                .andExpect(status().isBadRequest());
     }
 }
