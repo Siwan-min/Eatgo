@@ -1,8 +1,5 @@
 package kr.co.fastcampus.eatgo.domain;
 
-//import jdk.internal.jimage.ImageStrings;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import javax.persistence.Entity;
