@@ -7,57 +7,39 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ReviewController.class)
 public class ReviewControllerTests {
 
     @Autowired
-    MockMvc mvc;
+    private MockMvc mvc;
 
     @MockBean
     private ReviewService reviewService;
 
-    //{"name":"JOKER","score":3,"description":"delicious"}
     @Test
-    public void createWithValidAttributes() throws Exception {
-        given(reviewService.addReview(eq(1L), any())).willReturn(
-                Review.builder()
-                    .id(1004L)
-//                    .name("JOKER")
-//                    .score(3)
-//                    .description("delicious")
-                    .build()
-        );
-        mvc.perform(post("/restaurants/1/reviews")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\":\"JOKER\",\"score\":3,\"description\":\"delicious\"}"))
-                .andExpect(status().isCreated())
-                .andExpect(header().string("location", "/restaurants/1/reviews/1004"));
+    public void list() throws Exception {
+        List<Review> reviews = new ArrayList<>();
 
-        verify(reviewService).addReview(eq(1L), any());
-    }
+        reviews.add(Review.builder().description("Cool!").build());
 
-    @Test
-    public void createWithInvalidAttributes() throws Exception {
-        mvc.perform(post("/restaurants/1/reviews")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{}"))
-                .andExpect(status().isBadRequest());
+        given(reviewService.getReviews()).willReturn(reviews);
 
-        verify(reviewService, never()).addReview(eq(1L), any());
+        mvc.perform(get("/reviews"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("Cool!")));
+
     }
 }

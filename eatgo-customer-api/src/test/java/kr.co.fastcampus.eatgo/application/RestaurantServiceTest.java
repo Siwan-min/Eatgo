@@ -26,13 +26,22 @@ class RestaurantServiceTest {
     @Mock
     private RestaurantRepository restaurantRepository;
 
+    @Mock
+    private MenuItemRepository menuItemRepository;
+
+    @Mock
+    private ReviewRepository reviewRepository;
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
 
         mockRestaurantRepository();
+        mockMenuItemRepository();
+        mockReviewRepository();
 
-        restaurantService = new RestaurantService(restaurantRepository);
+        restaurantService = new RestaurantService(
+                restaurantRepository, menuItemRepository, reviewRepository);
     }
 
     private void mockRestaurantRepository() {
@@ -46,6 +55,26 @@ class RestaurantServiceTest {
         restaurants.add(restaurant);
         given(restaurantRepository.findAll()).willReturn(restaurants);
         given(restaurantRepository.findById(1004L)).willReturn(Optional.of(restaurant));
+    }
+
+    private void mockMenuItemRepository() {
+        List<MenuItem> menuItems = new ArrayList<>();
+        menuItems.add(MenuItem.builder()
+                            .name("Kimchi")
+                            .build());
+
+        given(menuItemRepository.findAllByRestaurantId(1004L)).willReturn(menuItems);
+    }
+
+    private void mockReviewRepository() {
+        List<Review> reviews = new ArrayList<>();
+        reviews.add(Review.builder()
+                .name("BeRyong")
+                .score(1)
+                .description("Bad")
+                .build());
+
+        given(reviewRepository.findAllByRestaurantId(1004L)).willReturn(reviews);
     }
 
     @Test
@@ -62,7 +91,17 @@ class RestaurantServiceTest {
     public void getRestaurantWithExisted() {
         Restaurant restaurant = restaurantService.getRestaurant(1004L);
 
+        verify(menuItemRepository).findAllByRestaurantId(eq(1004L));
+        verify(reviewRepository).findAllByRestaurantId(eq(1004L));
+
         assertThat(restaurant.getId(), is(1004L));
+
+        MenuItem menuItem = restaurant.getMenuItems().get(0);
+
+        assertThat(menuItem.getName(), is("Kimchi"));
+
+        Review review = restaurant.getReviews().get(0);
+        assertThat(review.getDescription(), is("Bad"));
     }
 
     @Test
