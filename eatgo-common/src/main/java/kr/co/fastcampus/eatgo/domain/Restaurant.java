@@ -30,6 +30,7 @@ public class Restaurant {
     private String address;
 
     @Transient
+    @Builder.Default
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<MenuItem> menuItems = new ArrayList<MenuItem>();
 
