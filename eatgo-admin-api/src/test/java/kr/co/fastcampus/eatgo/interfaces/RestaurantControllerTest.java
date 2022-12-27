@@ -43,6 +43,7 @@ public class RestaurantControllerTest {
         List<Restaurant> restaurants = new ArrayList<>();
         restaurants.add( Restaurant.builder()
                 .id(1004L)
+                .categoryId(1L)
                 .name("JOKER House")
                 .address("Seoul")
                 .build());
@@ -64,6 +65,7 @@ public class RestaurantControllerTest {
 
         Restaurant restaurant = Restaurant.builder()
                 .id(1004L)
+                .categoryId(1L)
                 .name("JOKER House")
                 .address("Seoul")
                 .build();
@@ -112,7 +114,8 @@ public class RestaurantControllerTest {
     @Test
     public void createWithValidData() throws Exception {
 
-        Map<String, String> input = new HashMap<>();
+        Map<String, Object> input = new HashMap<>();
+        input.put("categoryId", 1L);
         input.put("name", "BeRyong");
         input.put("address", "Busan");
 
@@ -120,6 +123,7 @@ public class RestaurantControllerTest {
             Restaurant restaurant = invocation.getArgument(0);
             return Restaurant.builder()
                     .id(1234L)
+                    .categoryId(1L)
                     .name("BeRyong")
                     .address("Busan")
                     .build();
@@ -127,8 +131,9 @@ public class RestaurantControllerTest {
 
         mvc.perform(post("/restaurants")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(input)))
-                //.content("{\"name:\":\"BeRyong\",\"address\":\"Busan\"}"))
+                // .content(objectMapper.writeValueAsString(input)))
+                .content("{\"categoryId\":1,\"name\":\"Beryong\"," +
+                        "\"address\":\"Busan\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("location", "/restaurants/1234"))
                 .andExpect(content().string("{}"));
@@ -145,7 +150,8 @@ public class RestaurantControllerTest {
 
         mvc.perform(post("/restaurants")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(input)))
+                //.content(objectMapper.writeValueAsString(input)))
+                .content("{\"categoryId\":1,\"name:\":\"\",\"address\":\"\"}"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -157,8 +163,9 @@ public class RestaurantControllerTest {
 
         mvc.perform(patch("/restaurants/1004")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(input)))
-                //.content("{\"name:\":\"JOKER Bar\",\"address\":\"Busan\"}"))
+                // .content(objectMapper.writeValueAsString(input)))
+                .content("{\"categoryId\":1,\"name\":\"JOKER Bar\"," +
+                        "\"address\":\"Busan\"}"))
                 .andExpect(status().isOk());
 
         verify(restaurantService).updateRestaurant(1004L, "JOKER Bar", "Busan");
@@ -172,7 +179,8 @@ public class RestaurantControllerTest {
 
         mvc.perform(patch("/restaurants/1004")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(input)))
+                //.content(objectMapper.writeValueAsString(input)))
+                .content("{\"categoryId\":1,\"name:\":\"\",\"address\":\"\"}"))
                 .andExpect(status().isBadRequest());
     }
 
