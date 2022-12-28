@@ -13,7 +13,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -23,12 +22,12 @@ public class UserServiceTests {
 
     private UserService userService;
     @Mock
-    private UserRepository userRepositoy;
+    private UserRepository userRepository;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        userService = new UserService(userRepositoy);
+        userService = new UserService(userRepository);
     }
 
     @Test
@@ -40,7 +39,7 @@ public class UserServiceTests {
                 .level(1L)
                 .build());
 
-        given(userRepositoy.findAll()).willReturn(mockUsers);
+        given(userRepository.findAll()).willReturn(mockUsers);
 
         List<User> users = userService.getUsers();
 
@@ -56,7 +55,7 @@ public class UserServiceTests {
 
         User mockUser = User.builder().email(email).name(name).build();
 
-        given(userRepositoy.save(any())).willReturn(mockUser);
+        given(userRepository.save(any())).willReturn(mockUser);
 
         User user = userService.addUser(email, name);
 
@@ -76,14 +75,34 @@ public class UserServiceTests {
                 .level(1L)
                 .build();
 
-        given(userRepositoy.findById(id)).willReturn(Optional.of(mockUser));
+        given(userRepository.findById(id)).willReturn(Optional.of(mockUser));
 
         User user = userService.updateUser(id, email, name, level);
 
-        verify(userRepositoy).findById(eq(id));
+        verify(userRepository).findById(eq(id));
 
         assertThat(user.getName()).isEqualTo("Superman");
         assertThat(user.isAdmin()).isTrue();
     }
 
+    @Test
+    public void deactiveUser() {
+        Long id = 1004L;
+
+        User mockUser = User.builder()
+                .id(id)
+                .email("admin@exmaple.com")
+                .name("Administrator")
+                .level(100L)
+                .build();
+
+        given(userRepository.findById(id)).willReturn(Optional.of(mockUser));
+
+        User user = userService.deactiveUser(1004L);
+
+        verify(userRepository).findById(1004L);
+
+        assertThat(user.isAdmin()).isFalse();
+        assertThat(user.isActive()).isFalse();
+    }
 }
